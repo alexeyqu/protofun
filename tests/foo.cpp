@@ -45,6 +45,11 @@ struct C<T, int>
     static int foo(T x) { return x + 1; }
 };
 
+int fib(int n)
+{
+    return (n == 0) ? 0 : fib(n - 1) + fib(n - 2);
+}
+
 
 int main(int argc, char ** argv)
 {
@@ -54,6 +59,8 @@ int main(int argc, char ** argv)
     A<char> a;
     C<char, int> c1;
     C<short, long> c2;
+
+    fib(25);
     
-    return add(x, y) + A<int>::foo(x) + b.oof(12., a);
+    return add(x, y) + A<int>::foo(x) + b.oof(12., a) + c2.foo(x);
 }

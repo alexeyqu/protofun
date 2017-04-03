@@ -30,24 +30,19 @@
 
 namespace
 {
- /*   class CallBackFunc : public clang::ast_matchers::MatchFinder::MatchCallBack 
+    enum DotEntryType
     {
-      public:
-         virtual void run(const clang::ast_matchers::MatcherFinder::MatchResult &Results) {
-            auto callee = Results.Nodes.getNodeAs<clang::CallExpr>("callee");
-            auto caller = Results.Nodes.getNodeAs<clang::CXXRecordDecl>("caller"); 
-
-           // Do what is required with callee and caller.
-        }
+        DOT_DECL,
+        DOT_CALL
     };
-*/
+
     class FunctionsCollector : public clang::RecursiveASTVisitor<FunctionsCollector>
     {
         clang::CompilerInstance & CI;
         const std::string root;
         const std::string lock;
         const std::string out;
-        std::vector<std::tuple<std::string, std::string, unsigned>> info;
+        std::vector<std::tuple<DotEntryType, std::string, std::string, std::string, unsigned>> info;
 
         std::string CallerFuncName;
         clang::FunctionDecl * CallerFuncDecl;
@@ -65,7 +60,6 @@ namespace
         bool VisitCallExpr(clang::CallExpr *E);
         void push_info();
         void print_info(std::ostream & os) const;
-
 
     private:
 

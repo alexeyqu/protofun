@@ -108,14 +108,12 @@ namespace
                 std::string s;
                 llvm::raw_string_ostream out(s);
 
-                out << "DECL ";
-
                 getFunctionName(out, decl);
 
                 const auto fn = getFileLine(decl);
                 if (!fn.first.empty() && fn.second)
                 {
-                   // info.emplace_back(std::make_tuple(out.str(), fn.first, fn.second));
+                   info.emplace_back(std::make_tuple(DotEntryType::DOT_DECL, std::string("declaration"),  out.str(), fn.first, fn.second));
                 }
             }
         }
@@ -178,16 +176,12 @@ namespace
                     std::string s;
                     llvm::raw_string_ostream out(s);
                     
-                    out << "CALL ";
-                    
                     getFunctionName(out, decl);
-
-                    out << " BY " << CallerFuncName;
 
                     const auto fn = getFileLine(CallerFuncDecl, expr);
                     if (!fn.first.empty() && fn.second)
                     {
-                       info.emplace_back(std::make_tuple(out.str(), fn.first, fn.second));
+                       info.emplace_back(std::make_tuple(DotEntryType::DOT_CALL, CallerFuncName, out.str(), fn.first, fn.second));
                     }
                 }
             }
@@ -197,15 +191,28 @@ namespace
 
     void FunctionsCollector::print_info(std::ostream & os) const
     {
+        os << "digraph callgraph {\n";
         for (auto && i : info)
         {
-            os << std::get<0>(i)
-               << " | "
-               << std::get<1>(i)
-               << " | "
-               << std::get<2>(i)
-               << '\n';
+            switch(std::get<0>(i))
+            {
+                case DotEntryType::DOT_DECL:
+                    os << "\"" << std::get<2>(i) << "\";\n";
+                    break;
+
+                case DotEntryType::DOT_CALL:
+                    os << "\"" << std::get<1>(i) << "\"" 
+                       << "->" << "\"" << std::get<2>(i) 
+                       << "\" [label = \"" << std::get<3>(i) << ":" 
+                       << std::get<4>(i) << "\"];\n";
+                    break;
+
+                default:
+                    exit(1);
+            }
         }
+        os << "}\n";
+
         os << std::flush;
     }
 
@@ -267,7 +274,7 @@ namespace
             {
                 out = args[1];
                 if (args.size() >= 3)
-                {
+                {        
                     lock = args[2];
                 }
             }
