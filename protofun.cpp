@@ -201,7 +201,7 @@ namespace
                     {
                        info.emplace_back(std::make_tuple(DotEntryType::DOT_CALL, CallerFuncName, out.str(), fn.first, fn.second));
                     }
-                }
+                } 
                 else if(clang::dyn_cast< clang::CXXDependentScopeMemberExpr >(expr->getCallee()))
                 {
                     std::string s;
@@ -214,10 +214,53 @@ namespace
                     {
                        info.emplace_back(std::make_tuple(DotEntryType::DOT_CALL, CallerFuncName, out.str(), fn.first, fn.second));
                     }
+                } 
+                else if(clang::dyn_cast<clang::UnresolvedLookupExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::CXXDependentScopeMemberExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::DependentScopeDeclRefExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::DeclRefExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::CastExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::CXXPseudoDestructorExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::CXXUnresolvedConstructExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::MemberExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::UnresolvedMemberExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::ParenExpr>(expr->getCallee())) 
+                {
+                    // TODO
+                }
+                else if(clang::dyn_cast<clang::CallExpr>(expr->getCallee())) 
+                {
+                    //More Function pointer code
                 }
                 else
                 {
-                    // here gotta be some other Expr variants
                     std::cout << "Unhandled expression..yet." << std::endl;
                 }
             }
