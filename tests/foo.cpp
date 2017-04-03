@@ -30,7 +30,7 @@ public:
     B(const B &) = delete;
     
     template<typename T>
-    float oof(float x, A<T> & a) const { return x + a.bar((T)x); }    
+    float oof(float x, A<T> & a) const { return x; /* + a.foo((T)x); */}    
 };
 
 template<typename T, typename U>
