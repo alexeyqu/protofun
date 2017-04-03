@@ -44,6 +44,32 @@ namespace
         }
     }
 
+    std::pair<std::string, unsigned> FunctionsCollector::getFileLine(const clang::Decl * decl, const clang::CallExpr * expr) const
+    {
+        const clang::SourceLocation loc = expr->getExprLoc();
+        const clang::SourceManager & sm = decl->getASTContext().getSourceManager();
+        const clang::FileID id = sm.getFileID(loc);
+        const clang::FileEntry * entry = sm.getFileEntryForID(id);
+        if (entry)
+        {
+            const std::string path = entry->tryGetRealPathName();
+            if (startswith(path, root))
+            {
+                const std::string trunc_path = path.substr(root.length());
+                return std::pair<std::string, unsigned>(trunc_path, sm.getSpellingLineNumber(loc));
+            }
+            else
+            {
+                return std::pair<std::string, unsigned>("", 0);
+            }
+        }
+        else
+        {
+            return std::pair<std::string, unsigned>("", sm.getSpellingLineNumber(loc));
+        }
+    }
+
+
     void FunctionsCollector::getFunctionName(llvm::raw_string_ostream & out, clang::FunctionDecl * decl)
     {
         const clang::PrintingPolicy & policy = CI.getASTContext().getPrintingPolicy();
@@ -64,7 +90,6 @@ namespace
         }
         out << ')';
     }
-
 
     void FunctionsCollector::handleFunctionDecl(clang::FunctionDecl * decl)
     {
@@ -90,7 +115,7 @@ namespace
                 const auto fn = getFileLine(decl);
                 if (!fn.first.empty() && fn.second)
                 {
-         //           info.emplace_back(std::make_tuple(out.str(), fn.first, fn.second));
+                   // info.emplace_back(std::make_tuple(out.str(), fn.first, fn.second));
                 }
             }
         }
@@ -118,6 +143,8 @@ namespace
         getFunctionName(callerStream, decl);
         CallerFuncName = callerStream.str();
 
+        CallerFuncDecl = decl;
+
         if (clang::CXXMethodDecl * cmdecl = clang::dyn_cast<clang::CXXMethodDecl>(decl))
         {
             if (clang::CXXRecordDecl * parent = cmdecl->getParent())
@@ -135,16 +162,16 @@ namespace
         return true;
     }
 
-    bool FunctionsCollector::VisitCallExpr(clang::CallExpr *E) 
+    bool FunctionsCollector::VisitCallExpr(clang::CallExpr * expr) 
     {       
-        if (E!=NULL)
+        if (expr != NULL)
         {
-            clang::QualType q = E->getType();
-            const clang::Type *t = q.getTypePtrOrNull();
+            clang::QualType qualtype = expr->getType();
+            const clang::Type * type = qualtype.getTypePtrOrNull();
 
-            if(t != NULL)
+            if(type != NULL)
             {
-                clang::FunctionDecl *decl = E->getDirectCallee(); //gives you callee   function
+                clang::FunctionDecl * decl = expr->getDirectCallee();
               
                 if (decl->isThisDeclarationADefinition() && !decl->isDeleted())
                 {
@@ -156,11 +183,12 @@ namespace
                     getFunctionName(out, decl);
 
                     out << " BY " << CallerFuncName;
-                    // const auto fn = getFileLine(E);
-                    // if (!fn.first.empty() && fn.second)
-                    // {
-                        info.emplace_back(std::make_tuple(out.str(), "", 0));
-                    // }
+
+                    const auto fn = getFileLine(CallerFuncDecl, expr);
+                    if (!fn.first.empty() && fn.second)
+                    {
+                       info.emplace_back(std::make_tuple(out.str(), fn.first, fn.second));
+                    }
                 }
             }
         }

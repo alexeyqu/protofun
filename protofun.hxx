@@ -50,12 +50,14 @@ namespace
         std::vector<std::tuple<std::string, std::string, unsigned>> info;
 
         std::string CallerFuncName;
+        clang::FunctionDecl * CallerFuncDecl;
 
     public:
 
         FunctionsCollector(clang::CompilerInstance & __CI, const std::string & __root, const std::string & __lock, const std::string & __out);
 
         std::pair<std::string, unsigned> getFileLine(const clang::Decl * decl) const;
+        std::pair<std::string, unsigned> getFileLine(const clang::Decl * decl, const clang::CallExpr * expr) const;
         void handleFunctionDecl(clang::FunctionDecl * decl);
         void getFunctionName(llvm::raw_string_ostream & out, clang::FunctionDecl * decl);
         bool VisitClassTemplateDecl(clang::ClassTemplateDecl * decl);
