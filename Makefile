@@ -11,7 +11,8 @@ PS_FILE = $(ROOT)callgraph.ps
 PNG_FILE = $(ROOT)callgraph.png
 
 CLANGPP = clang++-3.9
-CLANGPP_FLAGS = -std=c++11 -fsyntax-only
+CLANGPP_FLAGS = -std=c++11 -fsyntax-only 
+CLANGPP_DEBUG = -Xclang -ast-dump 
 CLANGPP_OPTS = -fplugin=./libprotofun.so -Xclang -plugin-arg-protofun -Xclang $(ROOT) -Xclang -plugin-arg-protofun -Xclang $(RES_FILE) -Xclang -plugin-arg-protofun -Xclang $(LOCK_FILE)
 
 build: libprotofun.so
